@@ -22,6 +22,11 @@ class NotSupportedError(Exception):
         super(NotSupportedError, self).__init__(msg)
 
 
+def validate(value, _range):
+    if value not in _range:
+        raise ValueError
+
+
 class IrMagician(object):
 
     def __init__(self, port=None):
@@ -60,8 +65,7 @@ class IrMagician(object):
 
     def set_bank(self, n):
         """Set memory bank(0-9)"""
-        if n < 0 or n > 9:
-            raise ValueError
+        validate(n, range(10))
         self._write('b,{}'.format(n))
 
     def capture(self):
@@ -70,7 +74,75 @@ class IrMagician(object):
 
     def dump(self, n):
         """Dump memory (0-63)"""
-        if n < 0 or n > 63:
-            raise ValueError
+        validate(n, range(64))
         self._write('d,{}'.format(n))
         return self._read(2)
+
+    def _error_correction_check(self):
+        self._write('e')
+
+    def information(self, n):
+        validate(n, range(8))
+        self._write('i,{}'.format(n))
+        return self._readline()
+
+    def set_pos_scaler(self, n):
+        validate(n, range(1,256))
+        self._write('k,{}'.format(n))
+        return self._readline()
+
+    def on_led(self):
+        self._write('l,1')
+        return self._readline()
+
+    def off_led(self):
+        self._write('l,0')
+        return self._readline()
+
+    def change_modulation(self, n):
+        validate(n, range(3))
+        self._write('m,{}'.format(n))
+        return self._readline()
+
+    def set_record_pointer(self, n):
+        validate(n, range(65536))
+        self._write('n,{}'.format(n))
+        return self._readline()
+
+    def play(self):
+        self._write('p')
+
+    def reset(self, n):
+        validate(n, range(2))
+        self._write('r,{}'.format(n))
+        return self._readline()
+
+    def _statics_mode(self):
+        self._write('s')
+        return self._readline()
+
+    def _raw_temp(self):
+        self._write('t')
+        t = self._readline()
+        self._readline()  # clear buffer
+        return t
+
+    def temp(self):
+        try:
+            t = self._convert_temp(int(self._raw_temp()))
+        except ValueError:
+            t = -273
+        return t
+
+    @staticmethod
+    def _convert_temp(n):
+        return ((5 / 1024 * n) - 0.4) / (19.53 / 1000)
+
+    def version(self):
+        self._write('v')
+        return self._readline()
+
+    def write(self, pos, data):
+        validate(pos, range(64))
+        validate(data, range(256))
+        self._write('w,{},{}'.format(pos, data))
