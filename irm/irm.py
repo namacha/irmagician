@@ -142,7 +142,7 @@ class IrMagician(object):
         self._write('v')
         result = self._readline()
         self._readline()  # should be 'OK'
-        return self._readline()
+        return result
 
     def write(self, pos, data):
         validate(pos, range(64))
