@@ -140,6 +140,8 @@ class IrMagician(object):
 
     def version(self):
         self._write('v')
+        result = self._readline()
+        self._readline()  # should be 'OK'
         return self._readline()
 
     def write(self, pos, data):
