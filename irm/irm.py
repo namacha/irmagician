@@ -30,7 +30,7 @@ def validate(value, _range):
 class IrMagician(object):
 
     def __init__(self, port=None):
-        self.port = self.get_port() if port is None else port
+        self.port = self._get_port() if port is None else port
         self._connected = False
         self.ir_serial = None
 
