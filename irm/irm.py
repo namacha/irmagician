@@ -71,6 +71,7 @@ class IrMagician(object):
     def capture(self):
         """Capture Signal"""
         self._write('c')
+        self._readline()  # flush output buffer
 
     def dump(self, n):
         """Dump memory (0-63)"""
